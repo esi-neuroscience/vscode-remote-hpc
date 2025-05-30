@@ -78,7 +78,7 @@ function HasBOM {
     $file=Get-Item $filename
     Announce "here"
     Announce $file.FullName
-    [byte[]]$bytes = [System.IO.File]::ReadAllBytes($path)
+    $bytes = [System.IO.File]::ReadAllBytes($path)
     # [byte[]]$bytes = Get-Content -Encoding Byte -ReadCount 3 -TotalCount 3 -Path $file.FullName
     Announce "here2"
     Announce $bytes
