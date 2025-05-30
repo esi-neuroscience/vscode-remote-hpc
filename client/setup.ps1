@@ -77,10 +77,10 @@ function HasBOM {
     )
     $file=Get-Item $filename
     [byte[]]$bytes = Get-Content -Encoding Byte -ReadCount 3 -TotalCount 3 -Path $file.FullName
-    Write-Host $bytes
-    $bytes[0] -eq 0xef
-    $bytes[1] -eq 0xbb
-    $bytes[2] -eq 0xbf
+    Announce $bytes
+    Announce $bytes[0] -eq 0xef
+    Announce $bytes[1] -eq 0xbb
+    Announce $bytes[2] -eq 0xbf
     if( $bytes[0] -eq 0xef -and $bytes[1] -eq 0xbb -and $bytes[2] -eq 0xbf )
     {
         return $true
