@@ -190,9 +190,9 @@ if (-not (Test-Path -Path $sshkey)) {
    }
    SanitizeKeys -filename $sshkey
    SanitizeKeys -filename "$sshkey.pub"
-   # if ((HasBOM -filename $sshkey) -or (HasBOM -filename "$sshkey.pub")) {
-   #    throw "Generated keys contain UTF-8 marks or BOMs"
-   # }
+   if ((HasBOM -filename $sshkey) -or (HasBOM -filename "$sshkey.pub")) {
+      throw "Generated keys contain UTF-8 marks or BOMs"
+   }
    if ($PSBoundParameters.Count -eq 0) {
       $cleankey = ([Text.Encoding]::UTF8.GetString([IO.File]::ReadAllBytes("$sshkey.pub")) -replace '^\uFEFF', '' -replace '[\uFEFF\r\n]', '')
       ssh $uname@$headnode "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '$cleankey' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
