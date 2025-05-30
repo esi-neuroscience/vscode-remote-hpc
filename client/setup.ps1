@@ -76,6 +76,7 @@ function HasBOM {
         [string]$filename
     )
     $file=Get-Item $filename
+    Announce "here"
     [byte[]]$bytes = Get-Content -Encoding Byte -ReadCount 3 -TotalCount 3 -Path $file.FullName
     Announce $bytes
     Announce $bytes[0] -eq 0xef
