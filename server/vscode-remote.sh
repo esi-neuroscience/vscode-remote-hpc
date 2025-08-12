@@ -11,22 +11,28 @@
 
 TIMEOUT=300
 if [[ "${HOSTNAME}" == "esi-sv"* ]]; then
-    SBATCH_PARAM="-p 8GBL -c 1 --mem-per-cpu 7500MB"
+    SBATCH_DEFAULTS="-p 8GBL"
 elif [[ "${HOSTNAME}" == "bic-sv"* ]]; then
-    SBATCH_PARAM="-p 8GBSx86 -c 1 --mem-per-cpu 7500MB"
+    SBATCH_DEFAULTS="-p 8GBSx86 -c 1 --mem-per-cpu 7500MB"
 else
     echo "WARNING: Unknown HPC environment ${HOSTNAME} - falling back to SLURM defaults"
-    SBATCH_PARAM="-q ni -t 12:00:00 --mem=32G -c 8"
+    SBATCH_DEFAULTS="-q ni -t 12:00:00 --mem=32G -c 8"
 fi
 
 function usage ()
 {
-    echo "Usage : $0 [command]
+    echo "Usage : $0 [command] <OPTIONS>
 
     General commands:
     list      List running vscode-remote jobs
     cancel    Cancels running vscode-remote jobs
+    start     Manually starts a SLURM job with optional sbatch arguments
     help      Display this message
+
+    Examples:
+
+    $0 start 16GBL
+              Launches a vscode-remote job for VS Code to connect to in the 16GBL partition
 
     Job command (see usage below):
     connect   Connect to compute node
@@ -100,14 +106,36 @@ function list () {
     echo "$(/usr/bin/squeue --me -O JobId,Partition,Name:$width,State,TimeUsed,TimeLimit,NodeList | grep -E "JOBID|$JOB_NAME")"
 }
 
+function start_slurm() {
+    PORT=$(shuf -i 60001-63000 -n 1)
+    list=($(/usr/bin/sbatch -J $JOB_NAME%$PORT $SBATCH_PARAM $SCRIPT_DIR/vscode-remote-job.sh $PORT))
+    JOB_SUBMIT_ID=${list[3]}
+    >&2 echo "Submitted new $JOB_NAME job (id: $JOB_SUBMIT_ID)"
+}
+
+function start() {
+    query_slurm
+
+    if [ ! -z "${JOB_STATE}" ]; then
+        echo "A vscode-remote-hpc job is already running. Please run '$0 cancel' first"
+        exit 1
+    fi
+
+    if [ ! -z "$1" ]; then
+        SBATCH_PARAM="-p $*"
+    else
+        SBATCH_PARAM="${SBATCH_DEFAULTS}"
+    fi
+    echo "Starting job using sbatch parameters ${SBATCH_PARAM}"
+    start_slurm
+}
+
 function connect () {
     query_slurm
 
     if [ -z "${JOB_STATE}" ]; then
-        PORT=$(shuf -i 60001-63000 -n 1)
-        list=($(/usr/bin/sbatch -J $JOB_NAME%$PORT $SBATCH_PARAM $SCRIPT_DIR/vscode-remote-job.sh $PORT))
-        JOB_SUBMIT_ID=${list[3]}
-        >&2 echo "Submitted new $JOB_NAME job (id: $JOB_SUBMIT_ID)"
+        SBATCH_PARAM="${SBATCH_DEFAULTS}"
+        start_slurm
     fi
 
     while [ ! "$JOB_STATE" == "RUNNING" ]; do
@@ -148,6 +176,7 @@ if [ ! -z "$1" ]; then
     case $1 in
         list)    list ;;
         cancel)  cancel ;;
+        start)   start "${@:2}" ;;
         connect) connect ;;
         help)    usage ;;
         *)  echo -e "Command '$1' does not exist" >&2
