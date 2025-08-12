@@ -18,6 +18,23 @@ and (in parts) heavily modified: the server-side installation requires administr
 access to the cluster head node(s), the client side installation supports macOS, 
 Linux and Windows (PowerShell) and does not need special privileges. 
 
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [VS Code Remote HPC](#vs-code-remote-hpc)
+  - [Features](#features)
+  - [Installation ](#installation)
+    - [Windows 10 and 11 (PowerShell) ](#windows-10-and-11-powershell)
+    - [Linux, macOS and Windows Subsystem for Linux (WSL)](#linux-macos-and-windows-subsystem-for-linux-wsl)
+  - [Usage](#usage)
+    - [Advanced Use](#advanced-use)
+  - [Removal](#removal)
+    - [Windows 10 and 11 (PowerShell) ](#windows-10-and-11-powershell-1)
+    - [Linux, macOS and Windows Subsystem for Linux (WSL)](#linux-macos-and-windows-subsystem-for-linux-wsl-1)
+  - [HPC Admin Setup](#hpc-admin-setup)
+
+<!-- markdown-toc end -->
+
 ## Features
 
 This script is designed to be used with the [Remote- SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) 
@@ -74,6 +91,24 @@ or manually by using `squeue --me` to find the right SLURM job id followed by
 
 The `vscode-remote` command installed on your HPC offers some additional commands 
 to list or cancel running jobs. You can invoke `vscode-remote help` for more information. 
+
+### Advanced Use
+
+You can customize the SLURM job for the `vscode-remote-hpc` host by manually running 
+`vscode-remote start <OPTIONS>` on your cluster head node. A custom partition can 
+be provided via 
+
+``` bash
+vscode-remote start <PARTITIONNAME>
+```
+
+For instance, on the ESI HPC cluster you could use `vscode-remote start 32GBL` to 
+start a `vscode-remote-hpc` host in the 32GBL partition (instead of the 8GBL default). 
+More `sbatch` options can be provided using their respective `sbatch` command flags, e.g., 
+
+``` bash
+vscode-remote start mypartition -c 3 --mem-per-cpu 6000
+```
 
 ## Removal
 
