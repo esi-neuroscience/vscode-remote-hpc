@@ -21,12 +21,18 @@ fi
 
 function usage ()
 {
-    echo "Usage : $0 [command]
+    echo "Usage : $0 [command] <OPTIONS>
 
     General commands:
     list      List running vscode-remote jobs
     cancel    Cancels running vscode-remote jobs
+    start     Manually starts a SLURM job with optional sbatch arguments
     help      Display this message
+
+    Examples:
+
+    $0 start 16GBL
+              Launches a vscode-remote job for VS Code to connect to in the 16GBL partition
 
     Job command (see usage below):
     connect   Connect to compute node
@@ -116,7 +122,7 @@ function start() {
     fi
 
     if [ ! -z "$1" ]; then
-        SBATCH_PARAM="-p $1"
+        SBATCH_PARAM="-p $*"
     else
         SBATCH_PARAM="${SBATCH_DEFAULTS}"
     fi
@@ -170,7 +176,7 @@ if [ ! -z "$1" ]; then
     case $1 in
         list)    list ;;
         cancel)  cancel ;;
-        start)   start "$2" ;;
+        start)   start "${@:2}" ;;
         connect) connect ;;
         help)    usage ;;
         *)  echo -e "Command '$1' does not exist" >&2
