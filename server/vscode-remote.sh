@@ -110,7 +110,7 @@ function start_slurm() {
 function start() {
     query_slurm
 
-    if [ -z "${JOB_STATE}" ]; then
+    if [ ! -z "${JOB_STATE}" ]; then
         echo "A vscode-remote-hpc job is already running. Please run '$0 cancel' first"
         exit 1
     fi
